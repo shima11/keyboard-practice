@@ -10,11 +10,131 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var textField: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+//        textField.resignFirstResponder()
+//        textField.becomeFirstResponder()
+
+        scrollView.keyboardDismissMode = .interactive
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardWillShow(notification:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil
+        )
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardDidShow(notification:)),
+                name: UIResponder.keyboardDidShowNotification,
+                object: nil
+        )
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardWillDismiss(notification:)),
+                name: UIResponder.keyboardDidHideNotification,
+                object: nil
+        )
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardDidDismiss(notification:)),
+                name: UIResponder.keyboardDidHideNotification,
+                object: nil
+        )
+
+//        NotificationCenter
+//            .default
+//            .addObserver(
+//                self,
+//                selector: #selector(keyboardWilLChangeFrame(notification:)),
+//                name: UIResponder.keyboardWillChangeFrameNotification,
+//                object: nil
+//        )
+//        NotificationCenter
+//            .default
+//            .addObserver(
+//                self,
+//                selector: #selector(keyboardDidChangeFrame(notification:)),
+//                name: UIResponder.keyboardDidChangeFrameNotification,
+//                object: nil
+//        )
     }
 
+    private func showWindowInfo() {
+        let windows = UIApplication.shared.windows
+        print("windows:\(windows.count)\n", windows)
+        print("key window:", UIApplication.shared.keyWindow)
+
+        // UIWindow, UITextEffectsWindow, UIRemoteKeyboardWindow
+
+        windows.forEach { window in
+            guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return }
+            print("is keyboard:", window.isKind(of: name))
+        }
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showWindowInfo()
+    }
+
+    @objc func keyboardWillShow(notification: Notification) {
+        print("======================================= will")
+        print("will show:\n", notification)
+        showWindowInfo()
+
+        let keyboardWindow = UIApplication.shared.windows
+            .filter { window in
+                guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+                return window.isKind(of: name)
+            }
+            .first
+        keyboardWindow?.layer.speed = 0
+
+    }
+
+    @objc func keyboardDidShow(notification: Notification) {
+        print("======================================= did")
+        print("did show:\n", notification)
+        showWindowInfo()
+    }
+
+    @objc func keyboardWillDismiss(notification: Notification) {
+        print("======================================= did")
+        print("will Dismisss:\n", notification)
+        showWindowInfo()
+    }
+
+    @objc func keyboardDidDismiss(notification: Notification) {
+        print("======================================= did")
+        print("did Dismiss:\n", notification)
+        showWindowInfo()
+    }
+
+//    @objc func keyboardWilLChangeFrame(notification: Notification) {
+//        print("=======================================")
+//        print("will change frame:\n", notification)
+//    }
+//
+//    @objc func keyboardDidChangeFrame(notification: Notification) {
+//        print("=======================================")
+//        print("did change frame:\n", notification)
+//    }
 
 }
 
