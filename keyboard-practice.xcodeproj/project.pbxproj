@@ -10,7 +10,6 @@
 		C67234321687AEB28C2F27F1 /* Pods_keyboard_practice.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7634EF5331A294913A069D47 /* Pods_keyboard_practice.framework */; };
 		D4A0063321578207000CEE66 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A0063221578207000CEE66 /* AppDelegate.swift */; };
 		D4A0063521578207000CEE66 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A0063421578207000CEE66 /* ViewController.swift */; };
-		D4A0063821578207000CEE66 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4A0063621578207000CEE66 /* Main.storyboard */; };
 		D4A0063A21578209000CEE66 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4A0063921578209000CEE66 /* Assets.xcassets */; };
 		D4A0063D21578209000CEE66 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4A0063B21578209000CEE66 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -22,7 +21,6 @@
 		D4A0062F21578207000CEE66 /* keyboard-practice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "keyboard-practice.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4A0063221578207000CEE66 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4A0063421578207000CEE66 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		D4A0063721578207000CEE66 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D4A0063921578209000CEE66 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D4A0063C21578209000CEE66 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4A0063E21578209000CEE66 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -80,7 +78,6 @@
 			children = (
 				D4A0063221578207000CEE66 /* AppDelegate.swift */,
 				D4A0063421578207000CEE66 /* ViewController.swift */,
-				D4A0063621578207000CEE66 /* Main.storyboard */,
 				D4A0063921578209000CEE66 /* Assets.xcassets */,
 				D4A0063B21578209000CEE66 /* LaunchScreen.storyboard */,
 				D4A0063E21578209000CEE66 /* Info.plist */,
@@ -150,7 +147,6 @@
 			files = (
 				D4A0063D21578209000CEE66 /* LaunchScreen.storyboard in Resources */,
 				D4A0063A21578209000CEE66 /* Assets.xcassets in Resources */,
-				D4A0063821578207000CEE66 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,11 +162,17 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-keyboard-practice/Pods-keyboard-practice-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/EasyPeasy/EasyPeasy.framework",
 				"${PODS_ROOT}/Reveal-SDK/RevealServer-18/iOS/RevealServer.framework",
+				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
+				"${BUILT_PRODUCTS_DIR}/RxKeyboard/RxKeyboard.framework",
+				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EasyPeasy.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RevealServer.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxKeyboard.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -210,14 +212,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D4A0063621578207000CEE66 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D4A0063721578207000CEE66 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D4A0063B21578209000CEE66 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
