@@ -9,11 +9,14 @@
 // https://dev.classmethod.jp/smartphone/ios-uiwindow/
 
 import UIKit
+import EasyPeasy
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var textField: UITextField!
+
+    @IBOutlet weak var inputContainerView: UIView!
 
     private var keyboardWindow: UIWindow?
 
@@ -30,7 +33,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardWillShow(notification:)),
-                name: UIResponder.keyboardWillShowNotification,
+                name: Notification.Name.UIKeyboardWillShow,
                 object: nil
         )
 
@@ -39,7 +42,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidShow(notification:)),
-                name: UIResponder.keyboardDidShowNotification,
+                name: Notification.Name.UIKeyboardDidShow,
                 object: nil
         )
 
@@ -48,7 +51,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardWillDismiss(notification:)),
-                name: UIResponder.keyboardDidHideNotification,
+                name: Notification.Name.UIKeyboardWillHide,
                 object: nil
         )
 
@@ -57,7 +60,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidDismiss(notification:)),
-                name: UIResponder.keyboardDidHideNotification,
+                name: Notification.Name.UIKeyboardDidHide,
                 object: nil
         )
 
@@ -66,7 +69,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardWilLChangeFrame(notification:)),
-                name: UIResponder.keyboardWillChangeFrameNotification,
+                name: Notification.Name.UIKeyboardWillChangeFrame,
                 object: nil
         )
 
@@ -75,7 +78,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidChangeFrame(notification:)),
-                name: UIResponder.keyboardDidChangeFrameNotification,
+                name: Notification.Name.UIKeyboardDidChangeFrame,
                 object: nil
         )
         
@@ -147,6 +150,8 @@ class ViewController: UIViewController {
     @objc func keyboardWilLChangeFrame(notification: Notification) {
 //        print("=======================================")
 //        print("will change frame:\n", notification)
+
+
     }
 
     @objc func keyboardDidChangeFrame(notification: Notification) {
