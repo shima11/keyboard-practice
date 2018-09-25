@@ -6,13 +6,17 @@
 //  Copyright © 2018 Jinsei Shima. All rights reserved.
 //
 
+// https://dev.classmethod.jp/smartphone/ios-uiwindow/
+
 import UIKit
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var textField: UITextField!
-    
+
+    private var keyboardWindow: UIWindow?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -57,28 +61,30 @@ class ViewController: UIViewController {
                 object: nil
         )
 
-//        NotificationCenter
-//            .default
-//            .addObserver(
-//                self,
-//                selector: #selector(keyboardWilLChangeFrame(notification:)),
-//                name: UIResponder.keyboardWillChangeFrameNotification,
-//                object: nil
-//        )
-//        NotificationCenter
-//            .default
-//            .addObserver(
-//                self,
-//                selector: #selector(keyboardDidChangeFrame(notification:)),
-//                name: UIResponder.keyboardDidChangeFrameNotification,
-//                object: nil
-//        )
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardWilLChangeFrame(notification:)),
+                name: UIResponder.keyboardWillChangeFrameNotification,
+                object: nil
+        )
+
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardDidChangeFrame(notification:)),
+                name: UIResponder.keyboardDidChangeFrameNotification,
+                object: nil
+        )
+        
     }
 
     private func showWindowInfo() {
         let windows = UIApplication.shared.windows
         print("windows:\(windows.count)\n", windows)
-        print("key window:", UIApplication.shared.keyWindow)
+        print("key window:", UIApplication.shared.keyWindow ?? "nil")
 
         // UIWindow, UITextEffectsWindow, UIRemoteKeyboardWindow
 
@@ -93,18 +99,30 @@ class ViewController: UIViewController {
         showWindowInfo()
     }
 
+    override func updateViewConstraints() {
+        print("update view constraints")
+        super.updateViewConstraints()
+    }
+
+    override func viewDidLayoutSubviews() {
+        print("view did layout subviews")
+        super.viewDidLayoutSubviews()
+    }
+
+
     @objc func keyboardWillShow(notification: Notification) {
         print("======================================= will")
         print("will show:\n", notification)
         showWindowInfo()
 
-        let keyboardWindow = UIApplication.shared.windows
+        keyboardWindow = UIApplication.shared.windows
             .filter { window in
                 guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
                 return window.isKind(of: name)
             }
             .first
-        keyboardWindow?.layer.speed = 0
+
+//        keyboardWindow?.layer.speed = 0
 
     }
 
@@ -126,15 +144,15 @@ class ViewController: UIViewController {
         showWindowInfo()
     }
 
-//    @objc func keyboardWilLChangeFrame(notification: Notification) {
+    @objc func keyboardWilLChangeFrame(notification: Notification) {
 //        print("=======================================")
 //        print("will change frame:\n", notification)
-//    }
-//
-//    @objc func keyboardDidChangeFrame(notification: Notification) {
+    }
+
+    @objc func keyboardDidChangeFrame(notification: Notification) {
 //        print("=======================================")
 //        print("did change frame:\n", notification)
-//    }
+    }
 
 }
 
