@@ -1,0 +1,6 @@
+framework module Pods_keyboard_practice {
+  umbrella header "Pods-keyboard-practice-umbrella.h"
+
+  export *
+  module * { export * }
+}
