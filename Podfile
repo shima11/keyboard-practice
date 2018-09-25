@@ -7,7 +7,10 @@ target 'keyboard-practice' do
 
   # Pods for keyboard-practice
 
-  pod "EasyPeasy"
+  pod 'EasyPeasy'
   pod 'Reveal-SDK', :configurations => ['Debug']
+  pod 'RxKeyboard'
+  pod 'RxSwift'
+  pod 'RxCocoa'
   
 end
