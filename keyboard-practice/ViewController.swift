@@ -14,11 +14,11 @@ import RxKeyboard
 
 class ViewController: UIViewController {
 
-    var scrollView: UIScrollView = .init()
+    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
-    var textField: UITextField = .init()
-    var sendButton: UIButton = .init()
-    var inputContainerView: UIView = .init()
+    let textField: UITextField = .init()
+    let sendButton: UIButton = .init()
+    let inputContainerView: UIView = .init()
 
     private var keyboardWindow: UIWindow?
 
@@ -32,25 +32,20 @@ class ViewController: UIViewController {
 //        textField.resignFirstResponder()
 //        textField.becomeFirstResponder()
 
-        view.addSubview(scrollView)
+        view.addSubview(collectionView)
         view.addSubview(inputContainerView)
-
-        let label = UILabel()
-        label.text = "hoge"
-        label.textColor = .gray
-        scrollView.addSubview(label)
-        label.easy.layout(
-            Center(),
-            Height(1200)
-        )
-
         inputContainerView.addSubview(textField)
         inputContainerView.addSubview(sendButton)
 
-        scrollView.keyboardDismissMode = .interactive
+        collectionView.delegate = self
+        collectionView.dataSource = self
 
-        inputContainerView.backgroundColor = .groupTableViewBackground
-        sendButton.setTitle("Send", for: .normal)
+        collectionView.backgroundColor = .white
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.keyboardDismissMode = .interactive
+
+        inputContainerView.backgroundColor = .white
+
         sendButton.setAttributedTitle(
             NSAttributedString(
                 string: "Send",
@@ -61,11 +56,10 @@ class ViewController: UIViewController {
             ),
             for: .normal
         )
-        textField.backgroundColor = .white
         textField.borderStyle = .none
+        textField.placeholder = "Message text..."
 
-
-        scrollView.easy.layout(
+        collectionView.easy.layout(
             Edges()
         )
 
@@ -86,7 +80,8 @@ class ViewController: UIViewController {
         textField.easy.layout(
             Top(8),
             Left(8),
-            Bottom(8)
+            Bottom(8),
+            Height(40)
         )
 
         sendButton.easy.layout(
@@ -100,8 +95,8 @@ class ViewController: UIViewController {
             .instance
             .willShowVisibleHeight
             .drive(onNext: { keyboardVisibleHeight in
-                self.scrollView.contentOffset.y += keyboardVisibleHeight
-                print("content offset y:", self.scrollView.contentInset)
+                self.collectionView.contentOffset.y += keyboardVisibleHeight
+                print("content offset y:", self.collectionView.contentInset)
             })
             .disposed(by: disposeBag)
 
@@ -121,11 +116,12 @@ class ViewController: UIViewController {
                 }
                 self.view.setNeedsLayout()
                 UIView.animate(withDuration: 0) {
-                    self.scrollView.contentInset.bottom = keyboardVisibleHeight + self.inputContainerView.bounds.height
-                    self.scrollView.scrollIndicatorInsets.bottom = self.scrollView.contentInset.bottom
+                    let bottomInset = keyboardVisibleHeight + self.inputContainerView.bounds.height
+                    self.collectionView.contentInset.bottom = bottomInset
+                    self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                     self.view.layoutIfNeeded()
                 }
-                print("content inset:", self.scrollView.contentInset)
+                print("content inset:", self.collectionView.contentInset)
             })
             .disposed(by: disposeBag)
 
@@ -213,9 +209,9 @@ class ViewController: UIViewController {
         print("view did layout subviews")
         super.viewDidLayoutSubviews()
 
-        if scrollView.contentInset.bottom == 0 {
-            scrollView.contentInset.bottom = inputContainerView.bounds.height
-            scrollView.scrollIndicatorInsets.bottom = scrollView.contentInset.bottom
+        if collectionView.contentInset.bottom == 0 {
+            collectionView.contentInset.bottom = inputContainerView.bounds.height
+            collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
     }
 
@@ -267,4 +263,43 @@ class ViewController: UIViewController {
     }
 
 }
+
+extension ViewController: UICollectionViewDataSource {
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        let inputView = UIView()
+        inputView.backgroundColor = .lightGray
+        inputView.layer.cornerRadius = 8
+        inputView.clipsToBounds = true
+        cell.addSubview(inputView)
+        inputView.easy.layout(
+            Left(8),
+            Top(8),
+            Right(8),
+            Bottom(8)
+        )
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 10
+    }
+
+}
+
+extension ViewController: UICollectionViewDelegate {
+
+}
+
+extension ViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 60)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+    }
+}
+
 
