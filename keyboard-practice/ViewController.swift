@@ -35,6 +35,15 @@ class ViewController: UIViewController {
         view.addSubview(scrollView)
         view.addSubview(inputContainerView)
 
+        let label = UILabel()
+        label.text = "hoge"
+        label.textColor = .gray
+        scrollView.addSubview(label)
+        label.easy.layout(
+            Center(),
+            Height(1200)
+        )
+
         inputContainerView.addSubview(textField)
         inputContainerView.addSubview(sendButton)
 
@@ -57,17 +66,22 @@ class ViewController: UIViewController {
 
 
         scrollView.easy.layout(
-            Top(),
-            Left(),
-            Right()
+            Edges()
         )
 
-        inputContainerView.easy.layout(
-            Top().to(scrollView, .bottom),
-            Left(),
-            Right(),
-            Bottom().with(.low)
-        )
+        if #available(iOS 11.0, *) {
+            inputContainerView.easy.layout(
+                Left(),
+                Right(),
+                Bottom().to(view.safeAreaLayoutGuide, .bottom)
+            )
+        } else {
+            inputContainerView.easy.layout(
+                Left(),
+                Right(),
+                Bottom().to(bottomLayoutGuide, .top)
+            )
+        }
 
         textField.easy.layout(
             Top(8),
@@ -82,7 +96,18 @@ class ViewController: UIViewController {
         )
 
 
-        RxKeyboard.instance.visibleHeight
+        RxKeyboard
+            .instance
+            .willShowVisibleHeight
+            .drive(onNext: { keyboardVisibleHeight in
+                self.scrollView.contentOffset.y += keyboardVisibleHeight
+                print("content offset y:", self.scrollView.contentInset)
+            })
+            .disposed(by: disposeBag)
+
+        RxKeyboard
+            .instance
+            .visibleHeight
             .drive(onNext: { [weak self] keyboardVisibleHeight in
                 guard let `self` = self else { return }
                 if #available(iOS 11.0, *) {
@@ -103,14 +128,6 @@ class ViewController: UIViewController {
                 print("content inset:", self.scrollView.contentInset)
             })
             .disposed(by: disposeBag)
-
-        RxKeyboard.instance.willShowVisibleHeight
-            .drive(onNext: { keyboardVisibleHeight in
-                self.scrollView.contentOffset.y += keyboardVisibleHeight
-                print("content offset y:", self.scrollView.contentInset)
-            })
-            .disposed(by: disposeBag)
-
 
 
         NotificationCenter
@@ -195,6 +212,11 @@ class ViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         print("view did layout subviews")
         super.viewDidLayoutSubviews()
+
+        if scrollView.contentInset.bottom == 0 {
+            scrollView.contentInset.bottom = inputContainerView.bounds.height
+            scrollView.scrollIndicatorInsets.bottom = scrollView.contentInset.bottom
+        }
     }
 
 
