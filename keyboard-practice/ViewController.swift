@@ -95,6 +95,7 @@ class ViewController: UIViewController {
             .instance
             .willShowVisibleHeight
             .drive(onNext: { keyboardVisibleHeight in
+                print("++++", keyboardVisibleHeight)
                 self.collectionView.contentOffset.y += keyboardVisibleHeight
                 print("content offset y:", self.collectionView.contentInset)
             })
@@ -104,6 +105,7 @@ class ViewController: UIViewController {
             .instance
             .visibleHeight
             .drive(onNext: { [weak self] keyboardVisibleHeight in
+                print("****", keyboardVisibleHeight)
                 guard let `self` = self else { return }
                 if #available(iOS 11.0, *) {
                     self.inputContainerView.easy.layout(
@@ -191,7 +193,7 @@ class ViewController: UIViewController {
 
         windows.forEach { window in
             guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return }
-            print("is keyboard:", window.isKind(of: name))
+            print("is keyboard window:", window.isKind(of: name))
         }
     }
 
@@ -201,12 +203,12 @@ class ViewController: UIViewController {
     }
 
     override func updateViewConstraints() {
-        print("update view constraints")
+        print("::::update view constraints")
         super.updateViewConstraints()
     }
 
     override func viewDidLayoutSubviews() {
-        print("view did layout subviews")
+        print("::::view did layout subviews")
         super.viewDidLayoutSubviews()
 
         if collectionView.contentInset.bottom == 0 {
@@ -217,8 +219,8 @@ class ViewController: UIViewController {
 
 
     @objc func keyboardWillShow(notification: Notification) {
-        print("======================================= will")
-        print("will show:\n", notification)
+        print("======================================= will show")
+        print(notification)
         showWindowInfo()
 
         keyboardWindow = UIApplication.shared.windows
@@ -229,25 +231,28 @@ class ViewController: UIViewController {
             .first
 
 //        keyboardWindow?.layer.speed = 0
-
+        print("=======================================")
     }
 
     @objc func keyboardDidShow(notification: Notification) {
-        print("======================================= did")
-        print("did show:\n", notification)
+        print("======================================= did show")
+        print(notification)
         showWindowInfo()
+        print("=======================================")
     }
 
     @objc func keyboardWillDismiss(notification: Notification) {
-        print("======================================= did")
-        print("will Dismisss:\n", notification)
+        print("======================================= will dismiss")
+        print(notification)
         showWindowInfo()
+        print("=======================================")
     }
 
     @objc func keyboardDidDismiss(notification: Notification) {
-        print("======================================= did")
-        print("did Dismiss:\n", notification)
+        print("======================================= did dismiss")
+        print(notification)
         showWindowInfo()
+        print("=======================================")
     }
 
     @objc func keyboardWilLChangeFrame(notification: Notification) {
@@ -291,12 +296,21 @@ extension ViewController: UICollectionViewDataSource {
 
 extension ViewController: UICollectionViewDelegate {
 
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        print(scrollView.contentOffset.y, scrollView.bounds.height, scrollView.contentInset.top, scrollView.contentInset.bottom, scrollView.contentSize.height)
+        if scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height {
+            print("scroll to bottom")
+        }
+    }
+
 }
 
 extension ViewController: UICollectionViewDelegateFlowLayout {
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: 60)
     }
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
     }
