@@ -50,8 +50,8 @@ class ViewController: UIViewController {
             NSAttributedString(
                 string: "Send",
                 attributes: [
-                    NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14, weight: .bold),
-                    NSAttributedStringKey.foregroundColor: UIColor.darkGray
+                    NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .bold),
+                    NSAttributedString.Key.foregroundColor: UIColor.darkGray
                 ]
             ),
             for: .normal
@@ -127,13 +127,13 @@ class ViewController: UIViewController {
             })
             .disposed(by: disposeBag)
 
-
+        
         NotificationCenter
             .default
             .addObserver(
                 self,
                 selector: #selector(keyboardWillShow(notification:)),
-                name: Notification.Name.UIKeyboardWillShow,
+                name: UIResponder.keyboardWillShowNotification,
                 object: nil
         )
 
@@ -142,7 +142,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidShow(notification:)),
-                name: Notification.Name.UIKeyboardDidShow,
+                name: UIResponder.keyboardDidShowNotification,
                 object: nil
         )
 
@@ -151,7 +151,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardWillDismiss(notification:)),
-                name: Notification.Name.UIKeyboardWillHide,
+                name: UIResponder.keyboardWillHideNotification,
                 object: nil
         )
 
@@ -160,7 +160,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidDismiss(notification:)),
-                name: Notification.Name.UIKeyboardDidHide,
+                name: UIResponder.keyboardDidHideNotification,
                 object: nil
         )
 
@@ -169,7 +169,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardWilLChangeFrame(notification:)),
-                name: Notification.Name.UIKeyboardWillChangeFrame,
+                name: UIResponder.keyboardWillChangeFrameNotification,
                 object: nil
         )
 
@@ -178,7 +178,7 @@ class ViewController: UIViewController {
             .addObserver(
                 self,
                 selector: #selector(keyboardDidChangeFrame(notification:)),
-                name: Notification.Name.UIKeyboardDidChangeFrame,
+                name: UIResponder.keyboardDidChangeFrameNotification,
                 object: nil
         )
         
@@ -289,7 +289,7 @@ extension ViewController: UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return 20
     }
 
 }

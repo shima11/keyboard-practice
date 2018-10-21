@@ -3,9 +3,9 @@ PODS:
   - Reveal-SDK (18)
   - RxCocoa (4.3.1):
     - RxSwift (~> 4.0)
-  - RxKeyboard (0.8.3):
-    - RxCocoa (>= 4.1.0)
-    - RxSwift (>= 4.1.0)
+  - RxKeyboard (0.9.0):
+    - RxCocoa (>= 4.3.1)
+    - RxSwift (>= 4.3.1)
   - RxSwift (4.3.1)
 
 DEPENDENCIES:
@@ -27,9 +27,9 @@ SPEC CHECKSUMS:
   EasyPeasy: 2f2785ed78c6f9e9045221f2ff317730e7321bff
   Reveal-SDK: cce79388da3fd0bbb6ae19d769b906cfc3a33a89
   RxCocoa: 78763c7b07d02455598d9fc3c1ad091a28b73635
-  RxKeyboard: e5efbaa109c35be909dd888e53de0f0efdf5169e
+  RxKeyboard: 4f782303f499f41577b41c96c6a9a5d7acd51a47
   RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
 
 PODFILE CHECKSUM: aa8fe57389bd5fc22e31fb055c7c38f2f900fc5b
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.0.beta.1

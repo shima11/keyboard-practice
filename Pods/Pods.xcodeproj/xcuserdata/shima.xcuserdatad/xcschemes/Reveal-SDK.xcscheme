@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1B828D3F98B7C6936A2C1B914F83D901"
-               BlueprintName = "EasyPeasy"
+               BlueprintIdentifier = "0213FB7F7ABA98DD66EE56AEC5975975"
+               BlueprintName = "Reveal-SDK"
                ReferencedContainer = "container:Pods.xcodeproj"
-               BuildableName = "EasyPeasy.framework">
+               BuildableName = "Reveal-SDK">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
