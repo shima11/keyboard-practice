@@ -16,9 +16,11 @@ class ViewController: UIViewController {
 
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
+    let inputContainerView: UIView = .init()
+    
+    let inputContentView: UIView = .init()
     let textField: UITextField = .init()
     let sendButton: UIButton = .init()
-    let inputContainerView: UIView = .init()
 
     private var keyboardWindow: UIWindow?
 
@@ -34,8 +36,9 @@ class ViewController: UIViewController {
 
         view.addSubview(collectionView)
         view.addSubview(inputContainerView)
-        inputContainerView.addSubview(textField)
-        inputContainerView.addSubview(sendButton)
+        inputContainerView.addSubview(inputContentView)
+        inputContentView.addSubview(textField)
+        inputContentView.addSubview(sendButton)
 
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -63,14 +66,22 @@ class ViewController: UIViewController {
             Edges()
         )
 
+        inputContainerView.easy.layout(
+            Left(),
+            Bottom(),
+            Right()
+        )
+        
         if #available(iOS 11.0, *) {
-            inputContainerView.easy.layout(
+            inputContentView.easy.layout(
+                Top(),
                 Left(),
                 Right(),
                 Bottom().to(view.safeAreaLayoutGuide, .bottom)
             )
         } else {
-            inputContainerView.easy.layout(
+            inputContentView.easy.layout(
+                Top(),
                 Left(),
                 Right(),
                 Bottom().to(bottomLayoutGuide, .top)
@@ -108,17 +119,19 @@ class ViewController: UIViewController {
                 print("****", keyboardVisibleHeight)
                 guard let `self` = self else { return }
                 if #available(iOS 11.0, *) {
-                    self.inputContainerView.easy.layout(
-                        Bottom(keyboardVisibleHeight).to(self.view.safeAreaLayoutGuide, .bottom)
+                    self.inputContentView.easy.layout(
+                        Bottom(keyboardVisibleHeight).to(self.view.safeAreaLayoutGuide, .bottom).when({ return keyboardVisibleHeight <= 0 }),
+                        Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
                     )
                 } else {
-                    self.inputContainerView.easy.layout(
-                        Bottom(keyboardVisibleHeight).to(self.bottomLayoutGuide, .top)
+                    self.inputContentView.easy.layout(
+                        Bottom(keyboardVisibleHeight).to(self.bottomLayoutGuide, .top).when({ return keyboardVisibleHeight <= 0 }),
+                        Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
                     )
                 }
                 self.view.setNeedsLayout()
                 UIView.animate(withDuration: 0) {
-                    let bottomInset = keyboardVisibleHeight + self.inputContainerView.bounds.height
+                    let bottomInset = keyboardVisibleHeight + self.inputContentView.bounds.height
                     self.collectionView.contentInset.bottom = bottomInset
                     self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                     self.view.layoutIfNeeded()
@@ -212,7 +225,7 @@ class ViewController: UIViewController {
         super.viewDidLayoutSubviews()
 
         if collectionView.contentInset.bottom == 0 {
-            collectionView.contentInset.bottom = inputContainerView.bounds.height
+            collectionView.contentInset.bottom = inputContentView.bounds.height
             collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
     }
