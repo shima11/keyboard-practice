@@ -13,6 +13,10 @@ import RxSwift
 import RxKeyboard
 
 class ViewController: UIViewController {
+    
+    enum OpenKeyboardType {
+        case interactive, unilateral
+    }
 
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
@@ -21,9 +25,12 @@ class ViewController: UIViewController {
     let inputContentView: UIView = .init()
     let textField: UITextField = .init()
     let sendButton: UIButton = .init()
-
+    
     private var keyboardWindow: UIWindow?
-
+    private var keyboardHeight: CGFloat?
+    private var openKeyboardType: OpenKeyboardType = .interactive
+    private var currentOffsetY: CGFloat = 0
+    
     private let disposeBag = DisposeBag()
 
     override func viewDidLoad() {
@@ -61,6 +68,11 @@ class ViewController: UIViewController {
         )
         textField.borderStyle = .none
         textField.placeholder = "Message text..."
+//        textField.rx.controlEvent(.editingDidBegin)
+//            .bind {
+//                self.openKeyboardType = .unilateral
+//            }
+//            .disposed(by: disposeBag)
 
         collectionView.easy.layout(
             Edges()
@@ -107,6 +119,7 @@ class ViewController: UIViewController {
             .willShowVisibleHeight
             .drive(onNext: { keyboardVisibleHeight in
                 print("++++", keyboardVisibleHeight)
+                self.keyboardHeight = keyboardVisibleHeight
                 self.collectionView.contentOffset.y += keyboardVisibleHeight
                 print("content offset y:", self.collectionView.contentInset)
             })
@@ -243,7 +256,14 @@ class ViewController: UIViewController {
             }
             .first
 
-//        keyboardWindow?.layer.speed = 0
+        print("open keyboard type:", openKeyboardType)
+        switch openKeyboardType {
+        case .interactive:
+            keyboardWindow?.layer.speed = 0
+        case .unilateral:
+            keyboardWindow?.layer.speed = 1
+        }
+        
         print("=======================================")
     }
 
@@ -271,8 +291,6 @@ class ViewController: UIViewController {
     @objc func keyboardWilLChangeFrame(notification: Notification) {
 //        print("=======================================")
 //        print("will change frame:\n", notification)
-
-
     }
 
     @objc func keyboardDidChangeFrame(notification: Notification) {
@@ -309,11 +327,34 @@ extension ViewController: UICollectionViewDataSource {
 
 extension ViewController: UICollectionViewDelegate {
 
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        currentOffsetY = scrollView.contentOffset.y
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
         print(scrollView.contentOffset.y, scrollView.bounds.height, scrollView.contentInset.top, scrollView.contentInset.bottom, scrollView.contentSize.height)
-        if scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height {
-            print("scroll to bottom")
+        
+        let isButtom = scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height
+        if isButtom {
+            print("scroll to buttom")
+            openKeyboardType = .interactive
+            textField.becomeFirstResponder()
         }
+
+        // TODO: keyboard
+
+        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
+            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
+            print("progress:", progress)
+            setProgressLayer(layer: layer, progress: progress)
+        }
+        
+    }
+    
+    func setProgressLayer(layer: CALayer, progress: CGFloat) {
+        layer.timeOffset = Double(progress)
+        layer.beginTime = layer.convertTime(CACurrentMediaTime(), from: nil)
     }
 
 }
