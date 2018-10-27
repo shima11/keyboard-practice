@@ -38,8 +38,8 @@ class ViewController: UIViewController {
 
         view.backgroundColor = .white
 
-//        textField.resignFirstResponder()
-//        textField.becomeFirstResponder()
+        textField.resignFirstResponder()
+        textField.becomeFirstResponder()
 
         view.addSubview(collectionView)
         view.addSubview(inputContainerView)
@@ -118,10 +118,10 @@ class ViewController: UIViewController {
             .instance
             .willShowVisibleHeight
             .drive(onNext: { keyboardVisibleHeight in
-                print("++++", keyboardVisibleHeight)
                 self.keyboardHeight = keyboardVisibleHeight
                 self.collectionView.contentOffset.y += keyboardVisibleHeight
-                print("content offset y:", self.collectionView.contentInset)
+//                print("++++", keyboardVisibleHeight)
+//                print("content offset y:", self.collectionView.contentInset)
             })
             .disposed(by: disposeBag)
 
@@ -129,7 +129,6 @@ class ViewController: UIViewController {
             .instance
             .visibleHeight
             .drive(onNext: { [weak self] keyboardVisibleHeight in
-                print("****", keyboardVisibleHeight)
                 guard let `self` = self else { return }
                 if #available(iOS 11.0, *) {
                     self.inputContentView.easy.layout(
@@ -149,7 +148,8 @@ class ViewController: UIViewController {
                     self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                     self.view.layoutIfNeeded()
                 }
-                print("content inset:", self.collectionView.contentInset)
+//                print("****", keyboardVisibleHeight)
+//                print("content inset:", self.collectionView.contentInset)
             })
             .disposed(by: disposeBag)
 
@@ -209,23 +209,10 @@ class ViewController: UIViewController {
         )
         
     }
-
-    private func showWindowInfo() {
-        let windows = UIApplication.shared.windows
-        print("windows:\(windows.count)\n", windows)
-        print("key window:", UIApplication.shared.keyWindow ?? "nil")
-
-        // UIWindow, UITextEffectsWindow, UIRemoteKeyboardWindow
-
-        windows.forEach { window in
-            guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return }
-            print("is keyboard window:", window.isKind(of: name))
-        }
-    }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        showWindowInfo()
+        showWindowInfo(notification: nil, isDisplay: false)
     }
 
     override func updateViewConstraints() {
@@ -235,28 +222,28 @@ class ViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         print("::::view did layout subviews")
-        super.viewDidLayoutSubviews()
-
-        if collectionView.contentInset.bottom == 0 {
+        if collectionView.contentInset.bottom <= 0 && openKeyboardType == .unilateral {
             collectionView.contentInset.bottom = inputContentView.bounds.height
             collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
+        super.viewDidLayoutSubviews()
     }
-
 
     @objc func keyboardWillShow(notification: Notification) {
         print("======================================= will show")
-        print(notification)
-        showWindowInfo()
+        showWindowInfo(notification: notification, isDisplay: false)
 
-        keyboardWindow = UIApplication.shared.windows
-            .filter { window in
-                guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
-                return window.isKind(of: name)
-            }
-            .first
-
+        if keyboardWindow == nil {
+            keyboardWindow = UIApplication.shared.windows
+                .filter { window in
+                    guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+                    return window.isKind(of: name)
+                }
+                .first
+        }
+        
         print("open keyboard type:", openKeyboardType)
+
         switch openKeyboardType {
         case .interactive:
             keyboardWindow?.layer.speed = 0
@@ -269,22 +256,19 @@ class ViewController: UIViewController {
 
     @objc func keyboardDidShow(notification: Notification) {
         print("======================================= did show")
-        print(notification)
-        showWindowInfo()
+        showWindowInfo(notification: notification, isDisplay: false)
         print("=======================================")
     }
 
     @objc func keyboardWillDismiss(notification: Notification) {
         print("======================================= will dismiss")
-        print(notification)
-        showWindowInfo()
+        showWindowInfo(notification: notification, isDisplay: false)
         print("=======================================")
     }
 
     @objc func keyboardDidDismiss(notification: Notification) {
         print("======================================= did dismiss")
-        print(notification)
-        showWindowInfo()
+        showWindowInfo(notification: notification, isDisplay: false)
         print("=======================================")
     }
 
@@ -297,7 +281,24 @@ class ViewController: UIViewController {
 //        print("=======================================")
 //        print("did change frame:\n", notification)
     }
-
+    
+    private func showWindowInfo(notification: Notification?, isDisplay: Bool = true) {
+        
+        guard isDisplay else { return }
+        
+        let windows = UIApplication.shared.windows
+        
+        print("notification:", notification ?? "nil")
+        print("windows:\(windows.count)\n", windows)
+        print("key window:", UIApplication.shared.keyWindow ?? "nil")
+        
+        // UIWindow, UITextEffectsWindow, UIRemoteKeyboardWindow
+        
+        windows.forEach { window in
+            guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return }
+            print("is keyboard window:", window.isKind(of: name))
+        }
+    }
 }
 
 extension ViewController: UICollectionViewDataSource {
@@ -333,7 +334,7 @@ extension ViewController: UICollectionViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
-        print(scrollView.contentOffset.y, scrollView.bounds.height, scrollView.contentInset.top, scrollView.contentInset.bottom, scrollView.contentSize.height)
+//        print(scrollView.contentOffset.y, scrollView.bounds.height, scrollView.contentInset.top, scrollView.contentInset.bottom, scrollView.contentSize.height)
         
         let isButtom = scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height
         if isButtom {
