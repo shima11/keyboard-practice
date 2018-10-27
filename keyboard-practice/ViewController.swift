@@ -38,8 +38,8 @@ class ViewController: UIViewController {
 
         view.backgroundColor = .white
 
-        textField.resignFirstResponder()
-        textField.becomeFirstResponder()
+//        textField.resignFirstResponder()
+//        textField.becomeFirstResponder()
 
         view.addSubview(collectionView)
         view.addSubview(inputContainerView)
@@ -122,6 +122,8 @@ class ViewController: UIViewController {
                 self.collectionView.contentOffset.y += keyboardVisibleHeight
 //                print("++++", keyboardVisibleHeight)
 //                print("content offset y:", self.collectionView.contentInset)
+                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+
             })
             .disposed(by: disposeBag)
 
@@ -148,7 +150,9 @@ class ViewController: UIViewController {
                     self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                     self.view.layoutIfNeeded()
                 }
+                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
 //                print("****", keyboardVisibleHeight)
+//                print("keyboard window:", self.keyboardWindow?.frame)
 //                print("content inset:", self.collectionView.contentInset)
             })
             .disposed(by: disposeBag)
@@ -222,10 +226,20 @@ class ViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         print("::::view did layout subviews")
-        if collectionView.contentInset.bottom <= 0 && openKeyboardType == .unilateral {
+        if collectionView.contentInset.bottom <= 0 {
             collectionView.contentInset.bottom = inputContentView.bounds.height
             collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
+
+        UIView.performWithoutAnimation {
+            keyboardWindow?.layoutSubviews()
+        }
+        
+//        CATransaction.begin()
+//        CATransaction.setDisableActions(true)
+//        keyboardWindow?.layoutSubviews()
+//        CATransaction.commit()
+        
         super.viewDidLayoutSubviews()
     }
 
@@ -233,24 +247,22 @@ class ViewController: UIViewController {
         print("======================================= will show")
         showWindowInfo(notification: notification, isDisplay: false)
 
-        if keyboardWindow == nil {
-            keyboardWindow = UIApplication.shared.windows
-                .filter { window in
-                    guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
-                    return window.isKind(of: name)
-                }
-                .first
-        }
-        
+        keyboardWindow = UIApplication.shared.windows
+            .filter { window in
+                guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+                return window.isKind(of: name)
+            }
+            .first
+        keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+
         print("open keyboard type:", openKeyboardType)
 
-        switch openKeyboardType {
-        case .interactive:
-            keyboardWindow?.layer.speed = 0
-        case .unilateral:
-            keyboardWindow?.layer.speed = 1
-        }
-        
+//        switch openKeyboardType {
+//        case .interactive:
+//            keyboardWindow?.layer.speed = 0
+//        case .unilateral:
+//            keyboardWindow?.layer.speed = 1
+//        }
         print("=======================================")
     }
 
@@ -338,18 +350,24 @@ extension ViewController: UICollectionViewDelegate {
         
         let isButtom = scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height
         if isButtom {
-            print("scroll to buttom")
+//            print("scroll to buttom")
             openKeyboardType = .interactive
-            textField.becomeFirstResponder()
+
+            //            UIView.perform(<#T##animation: UIView.SystemAnimation##UIView.SystemAnimation#>, on: <#T##[UIView]#>, options: <#T##UIView.AnimationOptions#>, animations: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>, completion: <#T##((Bool) -> Void)?##((Bool) -> Void)?##(Bool) -> Void#>)
+            
+            // キーボードの表示アニメーションなし
+            UIView.performWithoutAnimation {
+                textField.becomeFirstResponder()
+            }
         }
 
         // TODO: keyboard
 
-        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
-            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
-            print("progress:", progress)
-            setProgressLayer(layer: layer, progress: progress)
-        }
+//        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
+//            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
+//            print("progress:", progress)
+//            setProgressLayer(layer: layer, progress: progress)
+//        }
         
     }
     
