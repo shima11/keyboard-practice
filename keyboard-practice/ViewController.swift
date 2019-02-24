@@ -34,15 +34,14 @@ class ViewController: UIViewController {
     private let disposeBag = DisposeBag()
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
 
         view.backgroundColor = .white
 
-//        textField.resignFirstResponder()
-//        textField.becomeFirstResponder()
-
         view.addSubview(collectionView)
         view.addSubview(inputContainerView)
+
         inputContainerView.addSubview(inputContentView)
         inputContentView.addSubview(textField)
         inputContentView.addSubview(sendButton)
@@ -68,11 +67,6 @@ class ViewController: UIViewController {
         )
         textField.borderStyle = .none
         textField.placeholder = "Message text..."
-//        textField.rx.controlEvent(.editingDidBegin)
-//            .bind {
-//                self.openKeyboardType = .unilateral
-//            }
-//            .disposed(by: disposeBag)
 
         collectionView.easy.layout(
             Edges()
@@ -122,7 +116,7 @@ class ViewController: UIViewController {
                 self.collectionView.contentOffset.y += keyboardVisibleHeight
 //                print("++++", keyboardVisibleHeight)
 //                print("content offset y:", self.collectionView.contentInset)
-                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+//                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
 
             })
             .disposed(by: disposeBag)
@@ -150,8 +144,8 @@ class ViewController: UIViewController {
                     self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                     self.view.layoutIfNeeded()
                 }
-                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
-//                print("****", keyboardVisibleHeight)
+//                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+                print("****", keyboardVisibleHeight)
 //                print("keyboard window:", self.keyboardWindow?.frame)
 //                print("content inset:", self.collectionView.contentInset)
             })
@@ -253,7 +247,7 @@ class ViewController: UIViewController {
                 return window.isKind(of: name)
             }
             .first
-        keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+//        keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
 
         print("open keyboard type:", openKeyboardType)
 
