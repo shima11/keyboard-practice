@@ -1,12 +1,15 @@
 PODS:
-  - EasyPeasy (1.7.0)
-  - Reveal-SDK (18)
-  - RxCocoa (4.3.1):
-    - RxSwift (~> 4.0)
+  - EasyPeasy (1.9.0)
+  - Reveal-SDK (22)
+  - RxCocoa (5.0.0):
+    - RxRelay (~> 5)
+    - RxSwift (~> 5)
   - RxKeyboard (0.9.0):
     - RxCocoa (>= 4.3.1)
     - RxSwift (>= 4.3.1)
-  - RxSwift (4.3.1)
+  - RxRelay (5.0.0):
+    - RxSwift (~> 5)
+  - RxSwift (5.0.0)
 
 DEPENDENCIES:
   - EasyPeasy
@@ -21,15 +24,17 @@ SPEC REPOS:
     - Reveal-SDK
     - RxCocoa
     - RxKeyboard
+    - RxRelay
     - RxSwift
 
 SPEC CHECKSUMS:
-  EasyPeasy: 2f2785ed78c6f9e9045221f2ff317730e7321bff
-  Reveal-SDK: cce79388da3fd0bbb6ae19d769b906cfc3a33a89
-  RxCocoa: 78763c7b07d02455598d9fc3c1ad091a28b73635
+  EasyPeasy: 19a84ef8f8bbcf925b9fecc29d1d78b7dab96718
+  Reveal-SDK: 1385ab77aa15e9a3e21f798c74bd8e94cb54c651
+  RxCocoa: fcf32050ac00d801f34a7f71d5e8e7f23026dcd8
   RxKeyboard: 4f782303f499f41577b41c96c6a9a5d7acd51a47
-  RxSwift: fe0fd770a43acdb7d0a53da411c9b892e69bb6e4
+  RxRelay: 4f7409406a51a55cd88483f21ed898c234d60f18
+  RxSwift: 8b0671caa829a763bbce7271095859121cbd895f
 
 PODFILE CHECKSUM: aa8fe57389bd5fc22e31fb055c7c38f2f900fc5b
 
-COCOAPODS: 1.6.0.beta.1
+COCOAPODS: 1.6.0

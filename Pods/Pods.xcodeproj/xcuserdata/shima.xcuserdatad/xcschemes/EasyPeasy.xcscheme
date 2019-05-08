@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1020"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1B828D3F98B7C6936A2C1B914F83D901"
+               BlueprintIdentifier = "02BEC391F724DC74B2AB96BB6037DEAB"
+               BuildableName = "EasyPeasy.framework"
                BlueprintName = "EasyPeasy"
-               ReferencedContainer = "container:Pods.xcodeproj"
-               BuildableName = "EasyPeasy.framework">
+               ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
