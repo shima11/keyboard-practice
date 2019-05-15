@@ -12,6 +12,41 @@ import EasyPeasy
 import RxSwift
 import RxKeyboard
 
+
+class KeyboardObserver {
+    
+    // KeyboardWindowだけを抽出する機能
+
+    private var changeHandler: ((UIWindow) -> Void)?
+    
+    func getKeybaordWindow(changeHandler: @escaping (UIWindow) -> Void) {
+        
+        self.changeHandler = changeHandler
+        
+        NotificationCenter
+            .default
+            .addObserver(
+                self,
+                selector: #selector(keyboardWillShow(notification:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil
+        )
+    }
+
+    @objc func keyboardWillShow(notification: Notification) {
+        
+        guard
+            let _keyboardWindow = UIApplication.shared.windows.filter({ window in
+                guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
+                return window.isKind(of: name)
+            }).first
+        else { return }
+        
+        changeHandler?(_keyboardWindow)
+    }
+
+}
+
 class ViewController: UIViewController {
     
     enum OpenKeyboardType {
@@ -25,6 +60,8 @@ class ViewController: UIViewController {
     let inputContentView: UIView = .init()
     let textField: UITextField = .init()
     let sendButton: UIButton = .init()
+    
+    private let keyboardObserver = KeyboardObserver()
     
     private var keyboardWindow: UIWindow?
     private var keyboardHeight: CGFloat?
@@ -46,171 +83,187 @@ class ViewController: UIViewController {
         inputContentView.addSubview(textField)
         inputContentView.addSubview(sendButton)
 
-        collectionView.delegate = self
-        collectionView.dataSource = self
-
-        collectionView.backgroundColor = .white
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        collectionView.keyboardDismissMode = .interactive
-
-        inputContainerView.backgroundColor = .white
-
-        sendButton.setAttributedTitle(
-            NSAttributedString(
-                string: "Send",
-                attributes: [
-                    NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .bold),
-                    NSAttributedString.Key.foregroundColor: UIColor.darkGray
-                ]
-            ),
-            for: .normal
-        )
-        textField.borderStyle = .none
-        textField.placeholder = "Message text..."
-
-        collectionView.easy.layout(
-            Edges()
-        )
-
-        inputContainerView.easy.layout(
-            Left(),
-            Bottom(),
-            Right()
-        )
-        
-        if #available(iOS 11.0, *) {
-            inputContentView.easy.layout(
-                Top(),
-                Left(),
-                Right(),
-                Bottom().to(view.safeAreaLayoutGuide, .bottom)
+        prepare: do {
+            
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            
+            collectionView.backgroundColor = .white
+            collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+            collectionView.keyboardDismissMode = .interactive
+            
+            inputContainerView.backgroundColor = .white
+            
+            sendButton.setAttributedTitle(
+                NSAttributedString(
+                    string: "Send",
+                    attributes: [
+                        NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14, weight: .bold),
+                        NSAttributedString.Key.foregroundColor: UIColor.darkGray
+                    ]
+                ),
+                for: .normal
             )
-        } else {
-            inputContentView.easy.layout(
-                Top(),
-                Left(),
-                Right(),
-                Bottom().to(bottomLayoutGuide, .top)
-            )
+            textField.borderStyle = .none
+            textField.placeholder = "Message text..."
+            
         }
-
-        textField.easy.layout(
-            Top(8),
-            Left(8),
-            Bottom(8),
-            Height(40)
-        )
-
-        sendButton.easy.layout(
-            CenterY().to(textField),
-            Left(8).to(textField, .right),
-            Right(8)
-        )
-
-
-        RxKeyboard
-            .instance
-            .willShowVisibleHeight
-            .drive(onNext: { keyboardVisibleHeight in
-                self.keyboardHeight = keyboardVisibleHeight
-                self.collectionView.contentOffset.y += keyboardVisibleHeight
-//                print("++++", keyboardVisibleHeight)
-//                print("content offset y:", self.collectionView.contentInset)
-//                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
-
-            })
-            .disposed(by: disposeBag)
-
-        RxKeyboard
-            .instance
-            .visibleHeight
-            .drive(onNext: { [weak self] keyboardVisibleHeight in
-                guard let `self` = self else { return }
-                if #available(iOS 11.0, *) {
-                    self.inputContentView.easy.layout(
-                        Bottom(keyboardVisibleHeight).to(self.view.safeAreaLayoutGuide, .bottom).when({ return keyboardVisibleHeight <= 0 }),
-                        Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
-                    )
-                } else {
-                    self.inputContentView.easy.layout(
-                        Bottom(keyboardVisibleHeight).to(self.bottomLayoutGuide, .top).when({ return keyboardVisibleHeight <= 0 }),
-                        Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
-                    )
-                }
-                self.view.setNeedsLayout()
-                UIView.animate(withDuration: 0) {
-                    let bottomInset = keyboardVisibleHeight + self.inputContentView.bounds.height
-                    self.collectionView.contentInset.bottom = bottomInset
-                    self.collectionView.scrollIndicatorInsets.bottom = bottomInset
-                    self.view.layoutIfNeeded()
-                }
-//                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
-                print("****", keyboardVisibleHeight)
-//                print("keyboard window:", self.keyboardWindow?.frame)
-//                print("content inset:", self.collectionView.contentInset)
-            })
-            .disposed(by: disposeBag)
-
         
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardWillShow(notification:)),
-                name: UIResponder.keyboardWillShowNotification,
-                object: nil
-        )
+        layout: do {
+            
+            collectionView.easy.layout(Edges())
+            
+            inputContainerView.easy.layout(
+                Left(),
+                Bottom(),
+                Right()
+            )
+            
+            if #available(iOS 11.0, *) {
+                inputContentView.easy.layout(
+                    Top(),
+                    Left(),
+                    Right(),
+                    Bottom().to(view.safeAreaLayoutGuide, .bottom)
+                )
+            } else {
+                inputContentView.easy.layout(
+                    Top(),
+                    Left(),
+                    Right(),
+                    Bottom().to(bottomLayoutGuide, .top)
+                )
+            }
+            
+            textField.easy.layout(
+                Top(8),
+                Left(8),
+                Bottom(8),
+                Height(40)
+            )
+            
+            sendButton.easy.layout(
+                CenterY().to(textField),
+                Left(8).to(textField, .right),
+                Right(8)
+            )
 
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardDidShow(notification:)),
-                name: UIResponder.keyboardDidShowNotification,
-                object: nil
-        )
+        }
+        
+        bind: do {
+            
+            RxKeyboard
+                .instance
+                .willShowVisibleHeight
+                .drive(onNext: { keyboardVisibleHeight in
+                    self.keyboardHeight = keyboardVisibleHeight
+                    self.collectionView.contentOffset.y += keyboardVisibleHeight
+                    //                print("++++", keyboardVisibleHeight)
+                    //                print("content offset y:", self.collectionView.contentInset)
+                    //                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+                    
+                })
+                .disposed(by: disposeBag)
+            
+            RxKeyboard
+                .instance
+                .visibleHeight
+                .drive(onNext: { [weak self] keyboardVisibleHeight in
+                    guard let `self` = self else { return }
+                    if #available(iOS 11.0, *) {
+                        self.inputContentView.easy.layout(
+                            Bottom(keyboardVisibleHeight).to(self.view.safeAreaLayoutGuide, .bottom).when({ return keyboardVisibleHeight <= 0 }),
+                            Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
+                        )
+                    } else {
+                        self.inputContentView.easy.layout(
+                            Bottom(keyboardVisibleHeight).to(self.bottomLayoutGuide, .top).when({ return keyboardVisibleHeight <= 0 }),
+                            Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
+                        )
+                    }
+                    self.view.setNeedsLayout()
+                    UIView.animate(withDuration: 0) {
+                        let bottomInset = keyboardVisibleHeight + self.inputContentView.bounds.height
+                        self.collectionView.contentInset.bottom = bottomInset
+                        self.collectionView.scrollIndicatorInsets.bottom = bottomInset
+                        self.view.layoutIfNeeded()
+                    }
+                    //                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
+                    print("****", keyboardVisibleHeight)
+                    //                print("keyboard window:", self.keyboardWindow?.frame)
+                    //                print("content inset:", self.collectionView.contentInset)
+                })
+                .disposed(by: disposeBag)
+            
+            keyboardObserver
+                .getKeybaordWindow(changeHandler: { [weak self] window in
+                    print(window)
+                    if self?.keyboardWindow == nil {
+                        self?.keyboardWindow = window
+                    }
+                })
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardWillShow(notification:)),
+                    name: UIResponder.keyboardWillShowNotification,
+                    object: nil
+            )
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardDidShow(notification:)),
+                    name: UIResponder.keyboardDidShowNotification,
+                    object: nil
+            )
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardWillDismiss(notification:)),
+                    name: UIResponder.keyboardWillHideNotification,
+                    object: nil
+            )
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardDidDismiss(notification:)),
+                    name: UIResponder.keyboardDidHideNotification,
+                    object: nil
+            )
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardWilLChangeFrame(notification:)),
+                    name: UIResponder.keyboardWillChangeFrameNotification,
+                    object: nil
+            )
+            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(keyboardDidChangeFrame(notification:)),
+                    name: UIResponder.keyboardDidChangeFrameNotification,
+                    object: nil
+            )
 
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardWillDismiss(notification:)),
-                name: UIResponder.keyboardWillHideNotification,
-                object: nil
-        )
-
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardDidDismiss(notification:)),
-                name: UIResponder.keyboardDidHideNotification,
-                object: nil
-        )
-
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardWilLChangeFrame(notification:)),
-                name: UIResponder.keyboardWillChangeFrameNotification,
-                object: nil
-        )
-
-        NotificationCenter
-            .default
-            .addObserver(
-                self,
-                selector: #selector(keyboardDidChangeFrame(notification:)),
-                name: UIResponder.keyboardDidChangeFrameNotification,
-                object: nil
-        )
+        }
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        showWindowInfo(notification: nil, isDisplay: false)
+        showWindowInfo(notification: nil, isDisplay: false, label: "view did appear")
     }
 
     override func updateViewConstraints() {
@@ -238,60 +291,35 @@ class ViewController: UIViewController {
     }
 
     @objc func keyboardWillShow(notification: Notification) {
-        print("======================================= will show")
-        showWindowInfo(notification: notification, isDisplay: false)
-
-        keyboardWindow = UIApplication.shared.windows
-            .filter { window in
-                guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return false }
-                return window.isKind(of: name)
-            }
-            .first
-//        keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
-
-        print("open keyboard type:", openKeyboardType)
-
-//        switch openKeyboardType {
-//        case .interactive:
-//            keyboardWindow?.layer.speed = 0
-//        case .unilateral:
-//            keyboardWindow?.layer.speed = 1
-//        }
-        print("=======================================")
+        showWindowInfo(notification: notification, isDisplay: false, label: "will show")
     }
-
+    
     @objc func keyboardDidShow(notification: Notification) {
-        print("======================================= did show")
-        showWindowInfo(notification: notification, isDisplay: false)
-        print("=======================================")
+        showWindowInfo(notification: notification, isDisplay: false, label: "did show")
     }
 
     @objc func keyboardWillDismiss(notification: Notification) {
-        print("======================================= will dismiss")
-        showWindowInfo(notification: notification, isDisplay: false)
-        print("=======================================")
+        showWindowInfo(notification: notification, isDisplay: false, label: "will dismiss")
     }
 
     @objc func keyboardDidDismiss(notification: Notification) {
-        print("======================================= did dismiss")
-        showWindowInfo(notification: notification, isDisplay: false)
-        print("=======================================")
+        showWindowInfo(notification: notification, isDisplay: false, label: "did dismiss")
     }
 
     @objc func keyboardWilLChangeFrame(notification: Notification) {
-//        print("=======================================")
-//        print("will change frame:\n", notification)
+        showWindowInfo(notification: notification, isDisplay: false, label: "will change frame")
     }
 
     @objc func keyboardDidChangeFrame(notification: Notification) {
-//        print("=======================================")
-//        print("did change frame:\n", notification)
+        showWindowInfo(notification: notification, isDisplay: false, label: "did change frame")
     }
     
-    private func showWindowInfo(notification: Notification?, isDisplay: Bool = true) {
+    private func showWindowInfo(notification: Notification?, isDisplay: Bool = true, label: String) {
         
         guard isDisplay else { return }
-        
+
+        print("=======================================", label)
+
         let windows = UIApplication.shared.windows
         
         print("notification:", notification ?? "nil")
@@ -304,6 +332,7 @@ class ViewController: UIViewController {
             guard let name = NSClassFromString("UIRemoteKeyboardWindow") else { return }
             print("is keyboard window:", window.isKind(of: name))
         }
+        print("=======================================")
     }
 }
 
