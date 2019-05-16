@@ -47,12 +47,18 @@ class KeyboardObserver {
 
 }
 
+// memo:
+//
+// UIView.performWithoutAnimation {}
+//
+// CATransaction.begin()
+// CATransaction.setDisableActions(true)
+// keyboardWindow?.layoutSubviews()
+// CATransaction.commit()
+
+
 class ViewController: UIViewController {
     
-    enum OpenKeyboardType {
-        case interactive, unilateral
-    }
-
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     let inputContainerView: UIView = .init()
@@ -65,7 +71,6 @@ class ViewController: UIViewController {
     
     private var keyboardWindow: UIWindow?
     private var keyboardHeight: CGFloat?
-    private var openKeyboardType: OpenKeyboardType = .interactive
     private var currentOffsetY: CGFloat = 0
     
     private let disposeBag = DisposeBag()
@@ -119,21 +124,12 @@ class ViewController: UIViewController {
                 Right()
             )
             
-            if #available(iOS 11.0, *) {
-                inputContentView.easy.layout(
-                    Top(),
-                    Left(),
-                    Right(),
-                    Bottom().to(view.safeAreaLayoutGuide, .bottom)
-                )
-            } else {
-                inputContentView.easy.layout(
-                    Top(),
-                    Left(),
-                    Right(),
-                    Bottom().to(bottomLayoutGuide, .top)
-                )
-            }
+            inputContentView.easy.layout(
+                Top(),
+                Left(),
+                Right(),
+                Bottom().to(view.safeAreaLayoutGuide, .bottom)
+            )
             
             textField.easy.layout(
                 Top(8),
@@ -152,16 +148,21 @@ class ViewController: UIViewController {
         
         bind: do {
             
+            keyboardObserver
+                .getKeybaordWindow(changeHandler: { [weak self] window in
+                    print(window)
+                    if self?.keyboardWindow == nil {
+                        self?.keyboardWindow = window
+                    }
+                })
+            
             RxKeyboard
                 .instance
                 .willShowVisibleHeight
                 .drive(onNext: { keyboardVisibleHeight in
                     self.keyboardHeight = keyboardVisibleHeight
                     self.collectionView.contentOffset.y += keyboardVisibleHeight
-                    //                print("++++", keyboardVisibleHeight)
-                    //                print("content offset y:", self.collectionView.contentInset)
-                    //                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
-                    
+//                print("++++", keyboardVisibleHeight)
                 })
                 .disposed(by: disposeBag)
             
@@ -170,17 +171,13 @@ class ViewController: UIViewController {
                 .visibleHeight
                 .drive(onNext: { [weak self] keyboardVisibleHeight in
                     guard let `self` = self else { return }
-                    if #available(iOS 11.0, *) {
-                        self.inputContentView.easy.layout(
-                            Bottom(keyboardVisibleHeight).to(self.view.safeAreaLayoutGuide, .bottom).when({ return keyboardVisibleHeight <= 0 }),
-                            Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
-                        )
-                    } else {
-                        self.inputContentView.easy.layout(
-                            Bottom(keyboardVisibleHeight).to(self.bottomLayoutGuide, .top).when({ return keyboardVisibleHeight <= 0 }),
-                            Bottom(keyboardVisibleHeight).when({ return keyboardVisibleHeight > 0 })
-                        )
-                    }
+                    self.inputContentView.easy.layout(
+                        Bottom(keyboardVisibleHeight)
+                            .to(self.view.safeAreaLayoutGuide, .bottom)
+                            .when({ return keyboardVisibleHeight <= 0 }),
+                        Bottom(keyboardVisibleHeight)
+                            .when({ return keyboardVisibleHeight > 0 })
+                    )
                     self.view.setNeedsLayout()
                     UIView.animate(withDuration: 0) {
                         let bottomInset = keyboardVisibleHeight + self.inputContentView.bounds.height
@@ -188,20 +185,9 @@ class ViewController: UIViewController {
                         self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                         self.view.layoutIfNeeded()
                     }
-                    //                self.keyboardWindow?.layer.backgroundColor = UIColor.red.withAlphaComponent(0.4).cgColor
                     print("****", keyboardVisibleHeight)
-                    //                print("keyboard window:", self.keyboardWindow?.frame)
-                    //                print("content inset:", self.collectionView.contentInset)
                 })
                 .disposed(by: disposeBag)
-            
-            keyboardObserver
-                .getKeybaordWindow(changeHandler: { [weak self] window in
-                    print(window)
-                    if self?.keyboardWindow == nil {
-                        self?.keyboardWindow = window
-                    }
-                })
             
             NotificationCenter
                 .default
@@ -270,24 +256,18 @@ class ViewController: UIViewController {
         print("::::update view constraints")
         super.updateViewConstraints()
     }
-
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+    }
+    
     override func viewDidLayoutSubviews() {
         print("::::view did layout subviews")
         if collectionView.contentInset.bottom <= 0 {
             collectionView.contentInset.bottom = inputContentView.bounds.height
             collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
-
-        UIView.performWithoutAnimation {
-            keyboardWindow?.layoutSubviews()
-        }
-        
-//        CATransaction.begin()
-//        CATransaction.setDisableActions(true)
-//        keyboardWindow?.layoutSubviews()
-//        CATransaction.commit()
-        
-        super.viewDidLayoutSubviews()
+                super.viewDidLayoutSubviews()
     }
 
     @objc func keyboardWillShow(notification: Notification) {
@@ -336,6 +316,47 @@ class ViewController: UIViewController {
     }
 }
 
+// MARK: - UICollectionViewDelegate
+
+extension ViewController: UICollectionViewDelegate {
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        currentOffsetY = scrollView.contentOffset.y
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        if isScrollViewButton(scrollView: scrollView) {
+            // キーボードの表示アニメーションなし
+            UIView.performWithoutAnimation {
+                textField.becomeFirstResponder()
+            }
+        }
+        
+        // TODO: keyboard
+        
+//        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
+//            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
+//            print("progress:", progress)
+//            setProgressLayer(layer: layer, progress: progress)
+//        }
+        
+    }
+    
+    private func isScrollViewButton(scrollView: UIScrollView) -> Bool {
+        
+        return (scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom) >= scrollView.contentSize.height
+    }
+
+    private func setProgressLayer(layer: CALayer, progress: CGFloat) {
+        layer.timeOffset = Double(progress)
+        layer.beginTime = layer.convertTime(CACurrentMediaTime(), from: nil)
+    }
+    
+}
+
+// MARK: - UICollectionViewDataSource
+
 extension ViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -361,45 +382,7 @@ extension ViewController: UICollectionViewDataSource {
 
 }
 
-extension ViewController: UICollectionViewDelegate {
-
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        currentOffsetY = scrollView.contentOffset.y
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-//        print(scrollView.contentOffset.y, scrollView.bounds.height, scrollView.contentInset.top, scrollView.contentInset.bottom, scrollView.contentSize.height)
-        
-        let isButtom = scrollView.contentOffset.y + scrollView.bounds.height - scrollView.contentInset.top - scrollView.contentInset.bottom >= scrollView.contentSize.height
-        if isButtom {
-//            print("scroll to buttom")
-            openKeyboardType = .interactive
-
-            //            UIView.perform(<#T##animation: UIView.SystemAnimation##UIView.SystemAnimation#>, on: <#T##[UIView]#>, options: <#T##UIView.AnimationOptions#>, animations: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>, completion: <#T##((Bool) -> Void)?##((Bool) -> Void)?##(Bool) -> Void#>)
-            
-            // キーボードの表示アニメーションなし
-            UIView.performWithoutAnimation {
-                textField.becomeFirstResponder()
-            }
-        }
-
-        // TODO: keyboard
-
-//        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
-//            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
-//            print("progress:", progress)
-//            setProgressLayer(layer: layer, progress: progress)
-//        }
-        
-    }
-    
-    func setProgressLayer(layer: CALayer, progress: CGFloat) {
-        layer.timeOffset = Double(progress)
-        layer.beginTime = layer.convertTime(CACurrentMediaTime(), from: nil)
-    }
-
-}
+// MARK: - UICollectionVeiwDelegateFlowLayout
 
 extension ViewController: UICollectionViewDelegateFlowLayout {
 
