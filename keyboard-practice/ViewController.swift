@@ -15,7 +15,7 @@ import RxKeyboard
 
 class KeyboardObserver {
     
-    // KeyboardWindowだけを抽出する機能
+    // feature: to extract a KeyboardWindow
 
     private var changeHandler: ((UIWindow) -> Void)?
     
@@ -185,6 +185,8 @@ class ViewController: UIViewController {
                         self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                         self.view.layoutIfNeeded()
                     }
+                    
+                    
                     print("****", keyboardVisibleHeight)
                 })
                 .disposed(by: disposeBag)
@@ -267,7 +269,7 @@ class ViewController: UIViewController {
             collectionView.contentInset.bottom = inputContentView.bounds.height
             collectionView.scrollIndicatorInsets.bottom = collectionView.contentInset.bottom
         }
-                super.viewDidLayoutSubviews()
+        super.viewDidLayoutSubviews()
     }
 
     @objc func keyboardWillShow(notification: Notification) {
@@ -314,6 +316,7 @@ class ViewController: UIViewController {
         }
         print("=======================================")
     }
+    
 }
 
 // MARK: - UICollectionViewDelegate
@@ -323,24 +326,23 @@ extension ViewController: UICollectionViewDelegate {
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         currentOffsetY = scrollView.contentOffset.y
     }
-    
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
         if isScrollViewButton(scrollView: scrollView) {
-            // キーボードの表示アニメーションなし
-            UIView.performWithoutAnimation {
+            if !textField.isFirstResponder {
+                // show keyboard with out animation
+//                UIView.performWithoutAnimation {
                 textField.becomeFirstResponder()
+//                }
             }
+
+//            if let layer = keyboardWindow?.layer, let height = keyboardHeight {
+//                let progress = (scrollView.contentOffset.y - currentOffsetY) / height
+//                print("progress:", progress)
+//                setProgressLayer(layer: layer, progress: 0.5)
+//            }
         }
-        
-        // TODO: keyboard
-        
-//        if let layer = keyboardWindow?.layer, let height = keyboardHeight, isButtom == true {
-//            let progress = (scrollView.contentOffset.y - currentOffsetY) / height
-//            print("progress:", progress)
-//            setProgressLayer(layer: layer, progress: progress)
-//        }
-        
     }
     
     private func isScrollViewButton(scrollView: UIScrollView) -> Bool {
@@ -349,6 +351,7 @@ extension ViewController: UICollectionViewDelegate {
     }
 
     private func setProgressLayer(layer: CALayer, progress: CGFloat) {
+        layer.speed = 0
         layer.timeOffset = Double(progress)
         layer.beginTime = layer.convertTime(CACurrentMediaTime(), from: nil)
     }
