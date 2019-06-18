@@ -153,6 +153,15 @@ class ViewController: UIViewController {
                     print(window)
                     if self?.keyboardWindow == nil {
                         self?.keyboardWindow = window
+                        print("==", self?.keyboardWindow?.rootViewController)
+                        print("==", self?.keyboardWindow?.inputViewController)
+                        print("==", self?.keyboardWindow?.inputAccessoryViewController)
+                        print("==", self?.keyboardWindow?.inputView)
+                        print("==", self?.keyboardWindow?.owningView)
+                        print("==", self?.keyboardWindow?.rootViewController?.view)
+                        print("==", self?.keyboardWindow?.inputViewController?.view)
+                        guard let layer = window.rootViewController?.view.layer else { return }
+                        self?.setProgressLayer(layer: layer, progress: 0.5)
                     }
                 })
             
@@ -160,12 +169,13 @@ class ViewController: UIViewController {
                 .instance
                 .willShowVisibleHeight
                 .drive(onNext: { keyboardVisibleHeight in
+//             Scroll the collectionView
                     self.keyboardHeight = keyboardVisibleHeight
                     self.collectionView.contentOffset.y += keyboardVisibleHeight
 //                print("++++", keyboardVisibleHeight)
                 })
                 .disposed(by: disposeBag)
-            
+
             RxKeyboard
                 .instance
                 .visibleHeight
@@ -185,8 +195,8 @@ class ViewController: UIViewController {
                         self.collectionView.scrollIndicatorInsets.bottom = bottomInset
                         self.view.layoutIfNeeded()
                     }
-                    
-                    
+
+
                     print("****", keyboardVisibleHeight)
                 })
                 .disposed(by: disposeBag)
